@@ -1,9 +1,10 @@
 name: LOC Collector (Python)
+
 on:
   workflow_dispatch:
     inputs:
       org:
-        description: jaiyesh024
+        description: GitHub org or username to scan
         required: true
         default: jaiyesh024
       filter_regex:
@@ -17,16 +18,21 @@ permissions:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    env: { GH_TOKEN: ${{ secrets.ORG_READ_TOKEN }} }
+    env:
+      # Use PAT if provided; otherwise gh will run unauthenticated (ok for public repos)
+      GH_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
     outputs:
       repos: ${{ steps.set.outputs.repos }}
     steps:
-      - id: list
+      - name: Install jq (needed in this job)
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: List repos and filter by name/description
+        id: list
         run: |
           gh repo list "${{ github.event.inputs.org }}" --limit 100 --json name,description \
           | jq -r --arg re "${{ github.event.inputs.filter_regex }}" \
             '[ .[] | select((.name|test($re;"i")) or ((.description//"")|test($re;"i"))) | .name ]' \
-          > repos.json
+            > repos.json
           echo "Found $(jq length repos.json) repos"
           cat repos.json
       - id: set
@@ -44,7 +50,7 @@ jobs:
         with:
           repository: ${{ github.event.inputs.org }}/${{ matrix.repo }}
           fetch-depth: 1
-          token: ${{ secrets.ORG_READ_TOKEN }}
+          token: ${{ secrets.ORG_READ_TOKEN }} # optional for public, required for private
       - run: sudo apt-get update && sudo apt-get install -y cloc jq
       - name: Count Python SLoC
         run: |
