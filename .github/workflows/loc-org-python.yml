@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       org:
-        description: GitHub org or username
+        description: jaiyesh024
         required: true
-        default: YOUR_USERNAME
+        default: jaiyesh024
       filter_regex:
         description: Repo name/desc regex
         required: false
