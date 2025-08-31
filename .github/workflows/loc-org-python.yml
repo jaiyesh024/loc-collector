@@ -10,7 +10,7 @@ on:
       filter_regex:
         description: Repo name/desc regex
         required: false
-        default: 'glue|lambda|etl|function|pipeline|misc'
+        default: 'glue|lambda|etl|function|pipeline|misc|src'
 
 permissions:
   contents: read
