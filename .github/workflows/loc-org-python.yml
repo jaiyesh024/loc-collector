@@ -54,7 +54,9 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y cloc jq
       - name: Count Python SLoC
         run: |
-          PY=$(cloc --json --include-lang=Python . 2>/dev/null | jq -r '.languages.Python.code // 0')
+          echo "Files present:"
+          ls -R | head -20
+          PY=$(cloc --json --include-ext=py . 2>/dev/null | jq -r '.Python.code // 0')
           TYPE="unknown"
           (test -d glue || test -d glue_jobs || grep -ERiq '(glueContext|AWS::Glue|boto3\.client\(["'\'']glue'\'']\))' .) && TYPE="Glue"
           (test -d lambda || test -d functions || grep -ERiq '(lambda_handler|AWS::Lambda|boto3\.client\(["'\'']lambda'\'']\))' .) && TYPE=$([ "$TYPE" = "Glue" ] && echo "Glue+Lambda" || echo "Lambda")
